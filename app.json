@@ -1,0 +1,68 @@
+{
+  "name": "nem2-faucet",
+  "description": "Faucet application for nem2",
+  "keywords": [
+    "nem",
+    "catapult",
+    "blockchain"
+  ],
+  "website": "https://github.com/44uk/nem2-faucet/",
+  "repository": "https://github.com/44uk/nem2-faucet/tree/master",
+  "env": {
+    "PORT": {
+      "value": "80"
+    },
+    "NEM_NETWORK": {
+      "value": "MIJIN_TEST"
+    },
+    "NEM_PRIVATE_KEY": {
+      "value": "__SET_YOUR_KEY__",
+      "description": "PrivateKey of Faucet Account that you want to assign."
+    },
+    "NEM_API_URL": {
+      "value": "http://catapult-api.example.com:3000",
+      "description": "API URL to connect."
+    },
+    "NEM_PUBLIC_URL": {
+      "required": false,
+      "description": "For link url."
+    },
+    "NEM_MOSAIC_FQN": {
+      "value": "nem:xem",
+      "required": false,
+      "description": "Distribution mosaic FQN."
+    },
+    "NEM_MOSAIC_HEX": {
+      "required": false,
+      "description": "For mosaic not linked with namespace"
+    },
+    "NEM_OUT_MIN": {
+      "value": "1000000000"
+    },
+    "NEM_OUT_MAX": {
+      "value": "5000000000"
+    },
+    "NEM_OUT_OPT": {
+      "required": false
+    },
+    "NEM_ENOUGH_BALANCE": {
+      "value": "100000000000"
+    },
+    "NEM_MAX_UNCONFIRMED": {
+      "value": "99"
+    },
+    "NEM_WAIT_HEIGHT": {
+      "value": "0"
+    },
+    "RECAPTCHA_CLIENT_SECRET": {
+      "required": false,
+      "description": "(Optional) disabled ReCaptcha if this is blank."
+    },
+    "RECAPTCHA_SERVER_SECRET": {
+      "required": false,
+      "description": "(Optional) disabled ReCaptcha if this is blank."
+    }
+  },
+  "addons": [],
+  "buildpacks": []
+}
