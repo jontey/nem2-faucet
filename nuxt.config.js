@@ -1,5 +1,4 @@
 const pkg = require('./package')
-require('dotenv').config({ path: '.env' })
 
 const recaptchaPlugin =
   process.env.RECAPTCHA_CLIENT_SECRET && process.env.RECAPTCHA_SERVER_SECRET
@@ -40,23 +39,20 @@ module.exports = {
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: [],
+  plugins: [{ src: '~plugins/vuex-persistedstate', ssr: false }],
 
   /*
    ** Nuxt.js modules
    */
-  modules: [
-    // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios',
-    // Doc: https://buefy.github.io/#/documentation
-    'nuxt-buefy'
-  ].concat(recaptchaPlugin),
+  modules: ['@nuxtjs/axios', 'nuxt-buefy'].concat(recaptchaPlugin),
 
   /*
    ** Axios module configuration
    */
   axios: {
-    // See https://github.com/nuxt-community/axios-module#options
+    baseURL: '/',
+    host: process.env.HOST || '0.0.0.0',
+    port: process.env.PORT || 4000
   },
 
   recaptcha: {
@@ -69,11 +65,7 @@ module.exports = {
    ** Build configuration
    */
   build: {
-    /*
-     ** You can extend webpack config here
-     */
     extend(config, ctx) {
-      // Run ESLint on save
       if (ctx.isDev && ctx.isClient) {
         config.module.rules.push({
           enforce: 'pre',
