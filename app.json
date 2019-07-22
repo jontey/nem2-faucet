@@ -25,6 +25,10 @@
       "value": "",
       "description": "Nemesis block hash."
     },
+    "NEM_FEE_MULTIPLER": {
+      "required": false,
+      "description": "Network fee multiplier"
+    },
     "NEM_API_URL": {
       "value": "http://catapult-api.example.com:3000",
       "description": "API URL to connect."

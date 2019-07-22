@@ -1,6 +1,5 @@
 const qs = require('querystring')
 const axios = require('axios')
-const jsJoda = require('js-joda')
 const nem = require('nem2-sdk')
 const rx = require('rxjs')
 const op = require('rxjs/operators')
@@ -131,7 +130,9 @@ const handler = conf => {
                 op.filter(tx => {
                   return (
                     tx.recipient.equals(recipientAddress) &&
-                    currentHeight.compact() - tx.transactionInfo.height.compact() < conf.WAIT_HEIGHT
+                    currentHeight.compact() -
+                      tx.transactionInfo.height.compact() <
+                      conf.WAIT_HEIGHT
                   )
                 }),
                 op.toArray(),
@@ -168,7 +169,13 @@ const handler = conf => {
           ])
         }),
         op.mergeMap(results => {
-          const [mosaicInfo, recipientAccount, faucetOwned, outgoings, unconfirmed] = results
+          const [
+            mosaicInfo,
+            recipientAccount,
+            faucetOwned,
+            outgoings,
+            unconfirmed
+          ] = results
 
           if (!(outgoings && unconfirmed)) {
             throw new Error(
@@ -181,7 +188,10 @@ const handler = conf => {
           const divisibility = mosaicInfo.divisibility
           const txAbsoluteAmount =
             sanitizeAmount(amount, divisibility, conf.OUT_MAX) ||
-            Math.min(faucetBalance, randomInRange(conf.OUT_MIN, conf.OUT_MAX, divisibility))
+            Math.min(
+              faucetBalance,
+              randomInRange(conf.OUT_MIN, conf.OUT_MAX, divisibility)
+            )
           console.debug(`Faucet balance => %d`, faucetOwned.relativeAmount())
           console.debug(`Mosaic divisibility => %d`, divisibility)
           console.debug(`Input amount => %s`, amount)
@@ -194,17 +204,26 @@ const handler = conf => {
           const transferTx = buildTransferTransaction(
             recipientAddress,
             mosaic,
-            buildMessage(message, encryption, conf.FAUCET_ACCOUNT, recipientAccount)
+            buildMessage(
+              message,
+              encryption,
+              conf.FAUCET_ACCOUNT,
+              recipientAccount
+            ),
+            conf.FEE_MULTIPLIER
           )
 
-          const signedTx = conf.FAUCET_ACCOUNT.sign(transferTx, conf.GENERATION_HASH)
+          const signedTx = conf.FAUCET_ACCOUNT.sign(
+            transferTx,
+            conf.GENERATION_HASH
+          )
           console.debug(`Generation Hash => %s`, conf.GENERATION_HASH)
           return transactionHttp.announce(signedTx).pipe(
             op.mergeMap(response => {
               return rx.of({
                 response,
                 txHash: signedTx.hash,
-                amount: txAbsoluteAmount / Math.pow(10, mosaicInfo.divisibility)
+                amount: txAbsoluteAmount / 10 ** mosaicInfo.divisibility
               })
             })
           )
@@ -220,7 +239,12 @@ const handler = conf => {
   }
 }
 
-function buildMessage(message = '', encryption = false, faucetAccount, publicAccount = null) {
+function buildMessage(
+  message = '',
+  encryption = false,
+  faucetAccount,
+  publicAccount = null
+) {
   if (encryption && publicAccount === null) {
     throw new Error('Required recipient public key exposed to encrypt message.')
   }
@@ -236,14 +260,24 @@ function buildMessage(message = '', encryption = false, faucetAccount, publicAcc
   }
 }
 
-const buildTransferTransaction = (address, transferrable, message) => {
-  return nem.TransferTransaction.create(
-    nem.Deadline.create(1439, jsJoda.ChronoUnit.MINUTES),
+const buildTransferTransaction = (
+  address,
+  transferrable,
+  message,
+  feeMultiplier
+) => {
+  const transferTx = nem.TransferTransaction.create(
+    nem.Deadline.create(),
     address,
     [transferrable],
     message,
     address.networkType
   )
+  if (feeMultiplier > 0) {
+    const MAX_FEE = transferTx.size * feeMultiplier
+    transferTx.maxFee = nem.UInt64.fromUint(MAX_FEE)
+  }
+  return transferTx
 }
 
 const requestReCaptchaValidation = async (response, secret, endpoint) => {
@@ -264,7 +298,7 @@ const randomInRange = (from, to, base) => {
 }
 
 const sanitizeAmount = (amount, base, max) => {
-  const absoluteAmount = parseFloat(amount) * Math.pow(10, base)
+  const absoluteAmount = parseFloat(amount) * 10 ** base
   if (absoluteAmount > max) {
     return max
   } else if (absoluteAmount <= 0) {
